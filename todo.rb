@@ -87,6 +87,14 @@ def error_for_todo_name(name)
   end
 end
 
+def load_list(num)
+  list = session[:lists][num] if num && session[:lists][num]
+  return list if list
+
+  session[:error] = "The requested list does not exist."
+  redirect "/lists"
+end
+
 # Create a new list
 post "/lists" do
   list_name = params[:list_name].strip
@@ -104,15 +112,15 @@ end
 # View to do items on a list
 get "/lists/:number" do
   @list_num = params[:number].to_i
-  @list = session[:lists][@list_num]
+  @list = load_list(@list_num)
 
   erb :list_detail, layout: :layout
 end
 
 # Get page to edit a list name
 get "/lists/:number/edit" do
-  list_num = params[:number].to_i
-  @list = session[:lists][list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
 
   erb :edit_list, layout: :layout
 end
@@ -120,8 +128,8 @@ end
 # Edit a list name
 post "/lists/:number" do
   list_name = params[:list_name].strip
-  list_num = params[:number].to_i
-  @list = session[:lists][list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
 
   error = error_for_list_name(list_name)
   if error
@@ -137,17 +145,17 @@ end
 # Delete a list
 post "/lists/:number/delete" do
   list_num = params[:number].to_i
-  list = session[:lists][list_num][:name]
   session[:lists].delete_at(list_num)
 
-  session[:success] = "#{list_name} has been deleted."
+  session[:success] = "The list has been deleted."
   redirect "/lists"
 end
 
 # Add a new todo to a list
 post "/lists/:list_num/todos" do
-  @list_num = params[:list_num].to_i
-  @list = session[:lists][@list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
+
   todo_name = params[:todo].strip
 
   error = error_for_todo_name(todo_name)
@@ -163,8 +171,8 @@ end
 
 # Delete a todo
 post "/lists/:list_num/todos/:todo_num/delete" do
-  @list_num = params[:list_num].to_i
-  @list = session[:lists][@list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
 
   todo_num = params[:todo_num].to_i
   @list[:todos].delete_at(todo_num)
@@ -175,8 +183,8 @@ end
 
 # Check or uncheck a todo checkbox
 post "/lists/:list_num/todos/:todo_num" do
-  @list_num = params[:list_num].to_i
-  @list = session[:lists][@list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
 
   todo_num = params[:todo_num].to_i
 
@@ -189,8 +197,8 @@ end
 
 # Check all todo checkboxes
 post "/lists/:list_num/completeall" do
-  @list_num = params[:list_num].to_i
-  @list = session[:lists][@list_num]
+  @list_num = params[:number].to_i
+  @list = load_list(@list_num)
 
   @list[:todos].each do |todo|
     todo[:completed] = true
