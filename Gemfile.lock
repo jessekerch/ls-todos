@@ -5,9 +5,7 @@ GEM
     multi_json (1.15.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
-    nio4r (2.5.9)
-    puma (6.2.2)
-      nio4r (~> 2.0)
+    pg (1.5.3)
     rack (2.2.6.4)
     rack-protection (3.0.6)
       rack
@@ -32,7 +30,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis
-  puma
+  pg
   sinatra
   sinatra-contrib
   webrick
